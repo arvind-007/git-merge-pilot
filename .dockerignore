@@ -1,0 +1,19 @@
+# Keep the build context small and free of secrets.
+**/node_modules
+**/dist
+**/coverage
+**/.data
+**/*.log
+**/*.tsbuildinfo
+**/.DS_Store
+.git
+.github
+.env
+.env.*
+!.env.example
+docs
+*.md
+!packages/**/*.md
+Dockerfile
+.dockerignore
+docker-compose*.yml

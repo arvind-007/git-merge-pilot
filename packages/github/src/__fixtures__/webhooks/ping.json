@@ -1,0 +1,12 @@
+{
+  "zen": "Keep it logically awesome.",
+  "hook_id": 1,
+  "hook": {
+    "type": "App"
+  },
+  "sender": {
+    "login": "dev-alice",
+    "id": 7001,
+    "type": "User"
+  }
+}

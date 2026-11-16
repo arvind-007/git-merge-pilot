@@ -1,0 +1,87 @@
+# git-merge-pilot: production-like stack (postgres, migrate, server, worker).
+#
+#   pnpm init-env                    # or: cp .env.example .env and fill MASTER_KEY / SESSION_SECRET
+#   docker compose up -d --build
+#   docker compose logs server       # copy the one-time setup token
+#   open http://localhost:3000/setup
+#
+# DATABASE_URL, REPO_CACHE_DIR and NODE_ENV are set here for the containers and
+# override the values in .env (which point at the dev database on localhost).
+# Set POSTGRES_PASSWORD in your shell or a compose-level .env before the first start
+# for anything other than local evaluation.
+
+x-app: &app
+  image: ${GMP_IMAGE:-git-merge-pilot:local}
+  build:
+    context: .
+    dockerfile: Dockerfile
+  env_file:
+    - path: .env
+      required: true
+  environment: &app-env
+    DATABASE_URL: postgres://${POSTGRES_USER:-gmp}:${POSTGRES_PASSWORD:-gmp}@postgres:5432/${POSTGRES_DB:-gmp}
+    REPO_CACHE_DIR: /data/repos
+    NODE_ENV: production
+    PORT: '3000'
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gmp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gmp}
+      POSTGRES_DB: ${POSTGRES_DB:-gmp}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    # Not published to the host. For local inspection only:
+    # ports: ['127.0.0.1:5432:5432']
+
+  # One-shot: applies pending migrations (advisory-locked, idempotent), then exits.
+  migrate:
+    <<: *app
+    command: ['migrate']
+    restart: 'no'
+    healthcheck:
+      disable: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  server:
+    <<: *app
+    command: ['server']
+    ports:
+      - '${GMP_BIND:-0.0.0.0}:${GMP_HOST_PORT:-3000}:3000'
+    volumes:
+      - repo-cache:/data/repos
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    <<: *app
+    command: ['worker']
+    # The worker has no HTTP port; its health is visible on the server's
+    # /api/system/status page (queue depth, failed jobs).
+    healthcheck:
+      disable: true
+    volumes:
+      - repo-cache:/data/repos
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:
+  repo-cache:

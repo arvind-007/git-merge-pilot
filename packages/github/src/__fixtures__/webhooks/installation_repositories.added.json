@@ -1,0 +1,38 @@
+{
+  "action": "added",
+  "installation": {
+    "id": 424242,
+    "account": {
+      "login": "acme-org",
+      "id": 9001,
+      "type": "Organization"
+    },
+    "repository_selection": "selected",
+    "app_id": 12345,
+    "target_type": "Organization",
+    "permissions": {
+      "metadata": "read",
+      "contents": "read",
+      "pull_requests": "read"
+    },
+    "events": ["pull_request", "push"],
+    "created_at": "2026-11-14T08:00:00Z",
+    "updated_at": "2026-11-14T08:00:00Z",
+    "suspended_at": null
+  },
+  "repository_selection": "selected",
+  "repositories_added": [
+    {
+      "id": 555003,
+      "name": "sprockets",
+      "full_name": "acme-org/sprockets",
+      "private": true
+    }
+  ],
+  "repositories_removed": [],
+  "sender": {
+    "login": "dev-alice",
+    "id": 7001,
+    "type": "User"
+  }
+}

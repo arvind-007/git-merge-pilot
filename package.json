@@ -1,0 +1,41 @@
+{
+  "name": "git-merge-pilot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hosted, read-only GitHub PR intelligence platform",
+  "license": "Apache-2.0",
+  "type": "module",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @gmp/server --filter @gmp/worker --filter @gmp/web run dev",
+    "build": "pnpm -r run build",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "db:migrate": "pnpm --filter @gmp/db run migrate",
+    "db:generate": "pnpm --filter @gmp/db run generate",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "init-env": "node scripts/init-env.mjs"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "argon2",
+      "esbuild"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.14.0",
+    "prettier": "^3.10.1",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^5.1.0"
+  }
+}

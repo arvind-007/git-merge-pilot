@@ -1,0 +1,72 @@
+{
+  "action": "completed",
+  "check_run": {
+    "id": 330001,
+    "name": "ci / test",
+    "head_sha": "1111111111111111111111111111111111111111",
+    "status": "completed",
+    "conclusion": "failure",
+    "started_at": "2026-11-14T09:40:00Z",
+    "completed_at": "2026-11-14T09:45:00Z",
+    "html_url": "https://github.com/acme-org/widgets/runs/330001",
+    "details_url": "https://ci.example/330001",
+    "app": {
+      "slug": "github-actions",
+      "name": "GitHub Actions"
+    },
+    "pull_requests": [
+      {
+        "number": 17,
+        "head": {
+          "sha": "1111111111111111111111111111111111111111",
+          "repo": {
+            "id": 555001
+          }
+        },
+        "base": {
+          "ref": "main",
+          "repo": {
+            "id": 555001
+          }
+        }
+      },
+      {
+        "number": 4,
+        "base": {
+          "ref": "main",
+          "repo": {
+            "id": 777,
+            "name": "widgets",
+            "full_name": "someone/widgets"
+          }
+        }
+      }
+    ]
+  },
+  "repository": {
+    "id": 555001,
+    "node_id": "R_1",
+    "name": "widgets",
+    "full_name": "acme-org/widgets",
+    "private": true,
+    "owner": {
+      "login": "acme-org",
+      "id": 9001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/acme-org/widgets",
+    "default_branch": "main",
+    "archived": false,
+    "updated_at": "2026-11-10T10:00:00Z",
+    "pushed_at": "2026-11-14T09:00:00Z"
+  },
+  "installation": {
+    "id": 424242,
+    "node_id": "MDIz"
+  },
+  "sender": {
+    "login": "dev-alice",
+    "id": 7001,
+    "type": "User"
+  }
+}

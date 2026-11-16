@@ -1,0 +1,38 @@
+{
+  "action": "removed",
+  "installation": {
+    "id": 424242,
+    "account": {
+      "login": "acme-org",
+      "id": 9001,
+      "type": "Organization"
+    },
+    "repository_selection": "selected",
+    "app_id": 12345,
+    "target_type": "Organization",
+    "permissions": {
+      "metadata": "read",
+      "contents": "read",
+      "pull_requests": "read"
+    },
+    "events": ["pull_request", "push"],
+    "created_at": "2026-11-14T08:00:00Z",
+    "updated_at": "2026-11-14T08:00:00Z",
+    "suspended_at": null
+  },
+  "repository_selection": "selected",
+  "repositories_added": [],
+  "repositories_removed": [
+    {
+      "id": 555002,
+      "name": "gadgets",
+      "full_name": "acme-org/gadgets",
+      "private": false
+    }
+  ],
+  "sender": {
+    "login": "dev-alice",
+    "id": 7001,
+    "type": "User"
+  }
+}

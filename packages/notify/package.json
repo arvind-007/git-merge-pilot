@@ -1,0 +1,27 @@
+{
+  "name": "@gmp/notify",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@gmp/core": "workspace:*",
+    "@gmp/db": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "luxon": "^3.7.2",
+    "nodemailer": "^10.5.0"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.7.6",
+    "@types/nodemailer": "^8.0.2"
+  }
+}

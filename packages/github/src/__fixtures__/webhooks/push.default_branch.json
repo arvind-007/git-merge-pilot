@@ -1,0 +1,55 @@
+{
+  "ref": "refs/heads/main",
+  "before": "0000000000000000000000000000000000000000",
+  "after": "3333333333333333333333333333333333333333",
+  "created": false,
+  "deleted": false,
+  "forced": false,
+  "commits": [
+    {
+      "id": "aaaa",
+      "message": "m1",
+      "added": ["src/new.ts"],
+      "modified": ["package.json"],
+      "removed": []
+    },
+    {
+      "id": "3333333333333333333333333333333333333333",
+      "message": "m2",
+      "added": [],
+      "modified": ["package.json", "README.md"],
+      "removed": ["old.txt"]
+    }
+  ],
+  "head_commit": {
+    "id": "3333333333333333333333333333333333333333",
+    "timestamp": "2026-11-14T13:00:00+01:00"
+  },
+  "repository": {
+    "id": 555001,
+    "node_id": "R_1",
+    "name": "widgets",
+    "full_name": "acme-org/widgets",
+    "private": true,
+    "owner": {
+      "login": "acme-org",
+      "id": 9001,
+      "type": "Organization"
+    },
+    "html_url": "https://github.com/acme-org/widgets",
+    "default_branch": "main",
+    "archived": false,
+    "updated_at": "2026-11-10T10:00:00Z",
+    "pushed_at": 1763110800,
+    "master_branch": "main"
+  },
+  "installation": {
+    "id": 424242,
+    "node_id": "MDIz"
+  },
+  "sender": {
+    "login": "dev-alice",
+    "id": 7001,
+    "type": "User"
+  }
+}
