@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setCsrfToken } from './api/client.ts';
 import type { PrReport, PullRequestDetail } from './api/types.ts';
@@ -258,5 +258,26 @@ describe('pull request report', () => {
       expect(screen.getAllByText(label).length).toBeGreaterThan(0);
     }
     expect(screen.getByText('Touches retry logic.')).toBeInTheDocument();
+  });
+
+  it('shares the risks as one-line bullets with a copy button', async () => {
+    setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    renderWithProviders(<App />, { route: '/pull-requests/pr1?tab=risk' });
+    fireEvent.click(await screen.findByRole('button', { name: /share issues/i }));
+    const panel = screen.getByRole('dialog', { name: /share issues/i });
+    expect(panel).toHaveTextContent('PR #42: Retry payment webhooks');
+    expect(panel).toHaveTextContent('Regression (Medium): Touches retry logic.');
+    // Low-risk dimensions are not shared.
+    expect(panel).not.toHaveTextContent('Security (Low)');
+    fireEvent.click(screen.getByRole('button', { name: /copy to clipboard/i }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
+    expect(writeText.mock.calls[0]![0]).toBe(
+      'PR #42: Retry payment webhooks (acme/api)\nRisks found:\n' +
+        '• Regression (Medium): Touches retry logic.\n\nhttps://github.com/acme/api/pull/42',
+    );
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog', { name: /share issues/i })).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
-import { ChevronDown, GitBranch, RefreshCw, ShieldCheck } from 'lucide-react';
-import { lazy, Suspense, useMemo, useState, type ReactNode } from 'react';
+import { ChevronDown, GitBranch, RefreshCw, Share2, ShieldCheck, X } from 'lucide-react';
+import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { errorMessage } from '../api/client.ts';
 import {
@@ -43,6 +43,7 @@ import {
   Badge,
   Button,
   Card,
+  CopyButton,
   EmptyState,
   ErrorState,
   ExternalA,
@@ -63,6 +64,7 @@ import {
   timeAgo,
 } from '../lib/format.ts';
 import { githubFileUrl } from '../lib/links.ts';
+import { riskShareLines, riskShareText } from '../lib/riskShare.ts';
 
 const Markdown = lazy(() =>
   import('../components/Markdown.tsx').then((m) => ({ default: m.Markdown })),
@@ -320,19 +322,114 @@ function DimensionCard({ score, ctx }: { score: RiskScore; ctx: LinkContext }) {
   );
 }
 
-function RiskTab({ report, ctx }: { report: PrReport; ctx: LinkContext }) {
+/** "Share issues" dropdown: one line per risk, copyable as plain text for Slack, WhatsApp, etc. */
+function ShareRisksMenu({ detail, report }: { detail: PullRequestDetail; report: PrReport }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const panelId = useId();
+  const lines = useMemo(() => riskShareLines(report), [report]);
+  const text = useMemo(() => riskShareText(detail, lines), [detail, lines]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className="relative">
+      <Button
+        variant="secondary"
+        size="sm"
+        icon={<Share2 className="size-4" aria-hidden />}
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((v) => !v)}
+      >
+        Share issues
+      </Button>
+      {open && (
+        <div
+          id={panelId}
+          role="dialog"
+          aria-label="Share issues"
+          className="absolute right-0 z-20 mt-2 w-[min(32rem,calc(100vw-2rem))] rounded-lg border border-slate-200 bg-white p-4 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+        >
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                PR #{detail.pullRequest.number}: {detail.pullRequest.title}
+              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-300">
+                {lines.length} {lines.length === 1 ? 'issue' : 'issues'} to share
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Paste into Slack, WhatsApp or any chat. The PR link is included.
+              </p>
+            </div>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => setOpen(false)}
+              className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <X className="size-4" aria-hidden />
+            </button>
+          </div>
+          {lines.length ? (
+            <ul className="max-h-72 list-disc space-y-1.5 overflow-y-auto pl-5 text-sm text-slate-800 dark:text-slate-200">
+              {lines.map((l) => (
+                <li key={l}>{l}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              No risks above “low” were found by the automated analysis.
+            </p>
+          )}
+          <div className="mt-4 flex justify-end">
+            <CopyButton value={text} label="Copy to clipboard" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RiskTab({
+  detail,
+  report,
+  ctx,
+}: {
+  detail: PullRequestDetail;
+  report: PrReport;
+  ctx: LinkContext;
+}) {
   const byDim = new Map(report.riskScores.map((s) => [s.dimension, s]));
   const ordered = RISK_DIMENSIONS.map((d) => byDim.get(d)).filter((s): s is RiskScore =>
     Boolean(s),
   );
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-slate-700 dark:text-slate-300">Overall:</span>
-        <RiskBadge level={report.overallRisk} />
-        <span className="text-xs text-slate-500 dark:text-slate-400">
-          The overall level is the highest of the six dimensions below.
-        </span>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-slate-700 dark:text-slate-300">Overall:</span>
+          <RiskBadge level={report.overallRisk} />
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            The overall level is the highest of the six dimensions below.
+          </span>
+        </div>
+        <ShareRisksMenu detail={detail} report={report} />
       </div>
       {ordered.length ? (
         <div className="grid gap-4 md:grid-cols-2">
@@ -994,7 +1091,7 @@ export function PullRequestPage() {
           />
           <TabPanel id={tab}>
             {tab === 'summary' && <SummaryTab detail={d} report={report} />}
-            {tab === 'risk' && <RiskTab report={report} ctx={ctx} />}
+            {tab === 'risk' && <RiskTab detail={d} report={report} ctx={ctx} />}
             {tab === 'breaking' && (
               <BreakingTab report={report} ctx={ctx} lifecycles={lifecycles} />
             )}
